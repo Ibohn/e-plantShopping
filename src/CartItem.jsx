@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { removeItem, updateQuantity } from './CartSlice';
+import { removeItem, updateQuantity, addItem } from './CartSlice';
 import './CartItem.css';
 
 const CartItem = ({ onContinueShopping }) => {
@@ -10,10 +10,9 @@ const CartItem = ({ onContinueShopping }) => {
   // Calculate total amount for all products in the cart
   const calculateTotalAmount = () => {
     return cart.reduce((total, item) => {
-      // Extract numeric value from cost string (e.g., "$15" -> 15)
       const price = parseFloat(item.cost.replace('$', ''));
       return total + (price * item.quantity);
-    }, 0).toFixed(2); // Round to 2 decimal places
+    }, 0).toFixed(2);
   };
 
   const handleContinueShopping = (e) => {
@@ -25,6 +24,7 @@ const CartItem = ({ onContinueShopping }) => {
   };
 
   const handleIncrement = (item) => {
+    // Utiliser updateQuantity pour augmenter la quantité
     dispatch(updateQuantity({
       name: item.name,
       amount: item.quantity + 1
@@ -33,19 +33,25 @@ const CartItem = ({ onContinueShopping }) => {
 
   const handleDecrement = (item) => {
     if (item.quantity > 1) {
-      // Decrease quantity by 1
+      // Utiliser updateQuantity pour diminuer la quantité
       dispatch(updateQuantity({
         name: item.name,
         amount: item.quantity - 1
       }));
     } else {
-      // Remove item if quantity would drop to 0
+      // Utiliser removeItem pour supprimer l'article
       dispatch(removeItem(item.name));
     }
   };
 
   const handleRemove = (item) => {
+    // Utiliser removeItem pour supprimer complètement l'article
     dispatch(removeItem(item.name));
+  };
+
+  // Fonction pour ajouter à nouveau un article (au cas où)
+  const handleAddItem = (item) => {
+    dispatch(addItem(item));
   };
 
   // Calculate total cost based on quantity for an item
@@ -54,13 +60,12 @@ const CartItem = ({ onContinueShopping }) => {
     return (price * item.quantity).toFixed(2);
   };
 
-  // If cart is empty, show empty cart message
   if (cart.length === 0) {
     return (
       <div className="cart-container">
         <h2 style={{ color: 'black' }}>Your Cart is Empty</h2>
         <div className="continue_shopping_btn">
-          <button className="get-started-button" onClick={(e) => handleContinueShopping(e)}>
+          <button className="get-started-button" onClick={handleContinueShopping}>
             Continue Shopping
           </button>
         </div>
@@ -78,6 +83,7 @@ const CartItem = ({ onContinueShopping }) => {
             <img className="cart-item-image" src={item.image} alt={item.name} />
             <div className="cart-item-details">
               <div className="cart-item-name">{item.name}</div>
+              <div className="cart-item-description">{item.description}</div>
               <div className="cart-item-cost">Price: {item.cost}</div>
               <div className="cart-item-quantity">
                 <button 
@@ -105,11 +111,14 @@ const CartItem = ({ onContinueShopping }) => {
           </div>
         ))}
       </div>
+      <div className="cart-summary">
+        <div className="total-items">Total Items: {cart.reduce((sum, item) => sum + item.quantity, 0)}</div>
+        <div className="total-amount">Total Amount: ${calculateTotalAmount()}</div>
+      </div>
       <div className="continue_shopping_btn">
-        <button className="get-started-button" onClick={(e) => handleContinueShopping(e)}>
+        <button className="get-started-button" onClick={handleContinueShopping}>
           Continue Shopping
         </button>
-        <br />
         <button className="get-started-button1" onClick={handleCheckoutShopping}>
           Checkout
         </button>
@@ -119,4 +128,3 @@ const CartItem = ({ onContinueShopping }) => {
 };
 
 export default CartItem;
-
